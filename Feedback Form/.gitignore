@@ -1,0 +1,12 @@
+
+# Python compiled files
+_pycache_/
+*.py[cod]
+*.pyo
+*.pyd
+
+v_env/
+
+db.sqlite3
+
+.env
