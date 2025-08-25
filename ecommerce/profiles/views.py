@@ -1,9 +1,12 @@
 from django.shortcuts import get_object_or_404, render, redirect
-from authentication.models import CustomUser
+from authentication.models import CustomUser, EmailConstants, EmailTemplate
 from django.contrib import messages
+
+from authentication.utils import mailer
 from .models import Profile, Address
 from main.utils import redirect_dashboard
 from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
 
 
 @login_required(login_url="login")
@@ -227,6 +230,19 @@ def edit_profile_view(request, id):
         user.last_name = last_name
         user.phone_no = phone_no
         user.save()
+
+        template_obj = EmailTemplate.objects.get(
+            identifier=EmailConstants.PROFILE_UPDATE
+        )
+        email_body = template_obj.template.format(
+            app_contact_url="https://cubexo.io/Contactus",
+            profile_url="http://127.0.0.1:8000/profile/profile-page/",
+            app_name="CUBEXO SOFTWARE SOLUTIONS",
+            username=user.first_name,
+        )
+
+        mailer(template_obj.subject, email_body, [user.email])
+
         messages.success(request, "Profile updated successfully")
         return redirect("profile-page")
 

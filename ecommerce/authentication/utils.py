@@ -9,11 +9,13 @@ from .permission_config import PERMISSION_CONFIG
 
 
 def assign_permission(user, role):
-    role_permission = PERMISSION_CONFIG.get(role,{})
+    role_permission = PERMISSION_CONFIG.get(role, {})
 
     for model, permissions in role_permission.items():
 
-        content_type = ContentType.objects.get_for_model(model) #returns the ContentType instance representing that model
+        content_type = ContentType.objects.get_for_model(
+            model
+        )  # returns the ContentType instance representing that model
 
         for perm_codename in permissions:
 
@@ -29,14 +31,14 @@ def generate_otp():
     return hotp(key=b"12345678901234567890", counter=random.randint(1, 9), digits=6)
 
 
-def mailer(subject, message, html_content, to: List[str]):
+def mailer(subject, body, to: List[str]):
     email = EmailMultiAlternatives(
         subject,
-        body=message,
+        body=body,
         from_email=settings.DEFAULT_FROM_EMAIL,
         to=to,
     )
-    email.attach_alternative(content=html_content, mimetype="text/html")
+
     email.send()
 
 

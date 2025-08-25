@@ -2,15 +2,12 @@
 
 <div class="container mt-5 mb-3">
   {% if messages %}
-          <div class="alert alert-warning py-2">
-            {% for msg in messages %}
-              {{ msg }}
-            {% endfor %}
-          </div>
-        {% endif %}
+  <div class="alert alert-warning py-2">
+    {% for msg in messages %} {{ msg }} {% endfor %}
+  </div>
+  {% endif %}
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="text-black-50">Orders</h2>
-    
   </div>
   <div class="row g-4">
     {% for order in orders %}
@@ -39,6 +36,10 @@
             {{ order.address }}
           </p>
           <p class="mb-1">
+            <span class="fw-bold text-info">Payment Mode :</span>
+            {{ order.payment_mode }}
+          </p>
+          <p class="mb-1">
             <span class="fw-bold text-info">Payment Status :</span>
             {{ order.payment_status }}
           </p>
@@ -59,7 +60,6 @@
       </div>
     </div>
 
- 
     {% empty %}
     <p class="text-muted">No orders found!</p>
     {% endfor %}
@@ -68,7 +68,7 @@
 
 {% endblock %}
 
-   <!-- <div class="modal fade" id="cancelorderModal{{ order.id }}" tabindex="-1">
+<!-- <div class="modal fade" id="cancelorderModal{{ order.id }}" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
           <form

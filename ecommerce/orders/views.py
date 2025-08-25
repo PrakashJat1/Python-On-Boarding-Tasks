@@ -41,100 +41,82 @@ def order_product_view(request, user_id, product_id):
     try:
         data = request.POST
 
+        print(data)
+
         customer = CustomUser.objects.filter(id=user_id).first()
         product = get_object_or_404(Product, id=product_id)
         quantity = int(data.get("quantity").strip())
         address = data.get("address")
+        payment_mode = data.get("payment_mode")
 
-        if not quantity or not address:
+        if not quantity or not address or not payment_mode:
+            print("hello")
             messages.warning(request, "All fields are required")
             return redirect("customer_dashboard")
 
         price = quantity * product.price
 
-        order_data = {
-            "amount": int(price * 100),
-            "currency": "INR",
-            "payment_capture": "1",
-        }
-        razorpay_order = client.order.create(order_data)
-        Order.objects.create(
-            customer=customer,
-            product=product,
-            quantity=3,
-            price=price,
-            status="on the way",
-            address=address,
-            razorpay_order_id=razorpay_order["id"],
-        )
-        product.quantity -= 1
-        product.save()
-        return JsonResponse(
-            {
-                "order_id": razorpay_order["id"],
-                "razorpay_key_id": settings.RAZORPAY_API_KEY,
-                "product_name": product.name,
-                "amount": order_data["amount"],
-                "razorpay_callback_url": settings.RAZORPAY_CALLBACK_URL,
-                "user": {
-                    "first_name": request.user.first_name,
-                    "last_name": request.user.last_name,
-                    "email": request.user.email,
-                    "phone_no": getattr(request.user, "phone_no", ""),
-                },
+        print(price)
+
+        if payment_mode == "online":
+            order_data = {
+                "amount": int(price * 100),
+                "currency": "INR",
+                "payment_capture": "1",
             }
-        )
+            razorpay_order = client.order.create(order_data)
+            Order.objects.create(
+                customer=customer,
+                product=product,
+                quantity=3,
+                price=price,
+                status="on the way",
+                address=address,
+                razorpay_order_id=razorpay_order["id"],
+                payment_mode=payment_mode,
+            )
+            product.quantity -= 1
+            print("order-placed with online")
+            product.save()
+            return JsonResponse(
+                {
+                    "order_id": razorpay_order["id"],
+                    "razorpay_key_id": settings.RAZORPAY_API_KEY,
+                    "product_name": product.name,
+                    "amount": order_data["amount"],
+                    "razorpay_callback_url": settings.RAZORPAY_CALLBACK_URL,
+                    "user": {
+                        "first_name": request.user.first_name,
+                        "last_name": request.user.last_name,
+                        "email": request.user.email,
+                        "phone_no": getattr(request.user, "phone_no", ""),
+                    },
+                }
+            )
+        elif payment_mode == "cod":
+            Order.objects.create(
+                customer=customer,
+                product=product,
+                quantity=3,
+                price=price,
+                status="on the way",
+                address=address,
+                payment_mode=payment_mode,
+            )
+            product.quantity -= 1
+            product.save()
+            print("order-placed with COD")
+            messages.success(request, "Order placed")
+            return redirect("order-page")
+        else:
+            print("Please select payment mode")
+            messages.warning(request, "Please select payment mode")
+            return redirect("order-page")
+
     except Exception as e:
         print("An exception occurred in order_product_view", e)
         messages.error(request, "Error in order_product_view")
         return redirect("customer_dashboard")
-
-
-# @csrf_exempt
-# @login_required(login_url="login")
-# def order_product_view(request, user_id, product_id):
-
-#     try:
-#         data = request.POST
-
-#         customer = CustomUser.objects.filter(id=user_id).first()
-#         product = get_object_or_404(Product, id=product_id)
-#         order_data = {
-#             "amount": int(product.price * 100),  # rupee to paise
-#             "currency": "INR",
-#             "payment_capture": "1",
-#         }
-#         razorpay_order = client.order.create(order_data)
-#         Order.objects.create(
-#             customer=customer,
-#             product=product,
-#             quantity=3,
-#             price=product.price,
-#             status="on the way",
-#             address="",
-#             razorpay_order_id=razorpay_order["id"],
-#         )
-#         product.quantity -= 1
-#         product.save()
-#         return JsonResponse(
-#             {
-#                 "order_id": razorpay_order["id"],
-#                 "razorpay_key_id": settings.RAZORPAY_API_KEY,
-#                 "product_name": product.name,
-#                 "amount": order_data["amount"],
-#                 "razorpay_callback_url": settings.RAZORPAY_CALLBACK_URL,
-#                 "user": {
-#                     "first_name": request.user.first_name,
-#                     "last_name": request.user.last_name,
-#                     "email": request.user.email,
-#                     "phone_no": getattr(request.user, "phone_no", ""),
-#                 },
-#             }
-#         )
-#     except Exception as e:
-#         print("An exception occurred in order_product_view", e)
-#         messages.error(request, "Error in order_product_view")
-#         return redirect("customer_dashboard")
 
 
 @login_required(login_url="login")

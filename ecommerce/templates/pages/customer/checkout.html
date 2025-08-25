@@ -1,18 +1,27 @@
 {% extends 'common/base.html' %} {% block content %}
 
-<div class="card shadow-sm p-3 rounded-3" style="max-width: 500px">
-  <div class="d-flex justify-content-between align-items-center">
-    <div>
-      <h4 class="mb-1 text-primary">Name: {{ product.name }}</h4>
-      <p class="mb-0 text-muted">Price: ₹{{ product.price }}</p>
+<div
+  class="container d-flex justify-content-center align-items-center min-vh-100"
+>
+  <div
+    class="card shadow-lg border-0 rounded-4"
+    style="max-width: 400px; width: 100%"
+  >
+    <div class="card-body p-4">
+      <div>
+        <h4 class="mb-1 text-primary">Name: {{ product.name }}</h4>
+        <p class="mb-0 text-muted">Price: ₹{{ product.price }}</p>
+      </div>
+      <div class="d-flex justify-content-center">
+        <button
+          class="btn btn-success px-4"
+          data-bs-toggle="modal"
+          data-bs-target="#orderModal{{ product.id }}"
+        >
+          Pay
+        </button>
+      </div>
     </div>
-    <button
-      class="btn btn-success px-4"
-      data-bs-toggle="modal"
-      data-bs-target="#orderModal{{ product.id }}"
-    >
-      Pay
-    </button>
   </div>
 </div>
 
@@ -61,6 +70,14 @@
           </select>
         </div>
 
+        <div class="modal-body">
+          <label for="payment_mode" class="form-label">Payment Mode :</label>
+          <select name="payment_mode" class="form-select" id="mode">
+            <option value="online" selected>Online</option>
+            <option value="cod">Cash On Delivery</option>
+          </select>
+        </div>
+
         <div class="modal-footer">
           <button type="submit" class="btn btn-success">Pay</button>
         </div>
@@ -74,7 +91,7 @@
   document
     .getElementById("orderForm{{ product.id }}")
     .addEventListener("submit", async function (e) {
-      e.preventDefault(); // stop normal form submission
+      e.preventDefault();
 
       let formData = new FormData(this);
 

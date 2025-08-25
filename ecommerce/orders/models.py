@@ -29,6 +29,7 @@ class Order(models.Model):
     quantity = models.PositiveIntegerField(default=0)
     price = models.PositiveIntegerField(default=0)
     address = models.CharField(max_length=255, default="")
+    payment_mode = models.CharField(max_length=40, blank=True, null=True)
     payment_status = models.BooleanField(default=False, blank=True)
     status = models.CharField(
         max_length=10, default="on the Way", choices=ORDER_STATUS_CHOICE

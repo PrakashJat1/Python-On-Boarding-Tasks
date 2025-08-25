@@ -125,3 +125,26 @@ class CustomUser(
 
     def __str__(self):
         return str(self.email)
+
+
+class EmailConstants:
+    REGISTRATION_OTP = "REGISTRATION_OTP"
+    REGISTRATION_CONFIRMATION = "REGISTRATION_CONFIRMATION"
+    RESET_PASSWORD = "RESET_PASSWORD"
+    RESET_PASSWORD_OTP = "RESET_PASSWORD_OTP"
+    PROFILE_UPDATE = "PROFILE_UPDATE"
+
+
+class EmailTemplate(models.Model):
+
+    EMAIL_CHOICE = (
+        (EmailConstants.REGISTRATION_OTP, "REGISTRATION_OTP"),
+        (EmailConstants.REGISTRATION_CONFIRMATION, "REGISTRATION_CONFIRMATION"),
+        (EmailConstants.RESET_PASSWORD, "RESET_PASSWORD"),
+        (EmailConstants.RESET_PASSWORD_OTP, "RESET_PASSWORD_OTP"),
+        (EmailConstants.PROFILE_UPDATE, "PROFILE_UPDATE"),
+    )
+
+    identifier = models.CharField(max_length=50, choices=EMAIL_CHOICE)
+    subject = models.CharField(max_length=100, blank=False, default="Email Subject")
+    template = models.TextField()

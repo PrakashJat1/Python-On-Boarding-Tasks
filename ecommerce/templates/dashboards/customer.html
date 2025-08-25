@@ -2,15 +2,12 @@
 
 <div class="container mt-5 mb-3">
   {% if messages %}
-          <div class="alert alert-warning py-2">
-            {% for msg in messages %}
-              {{ msg }}
-            {% endfor %}
-          </div>
-        {% endif %}
+  <div class="alert alert-warning py-2">
+    {% for msg in messages %} {{ msg }} {% endfor %}
+  </div>
+  {% endif %}
   <div class="d-flex justify-content-between align-items-center mb-4">
     {% include 'common/search_products.html' %} {% include 'common/product_sortby.html' %}
-    
   </div>
   <div class="row g-4">
     {% for product in products %}
@@ -42,7 +39,7 @@
           >
             >Order Now</a
           > -->
-          
+
           <a
             class="btn btn-sm btn-outline-primary"
             href="{% url 'checkout' product.id %}"
@@ -91,15 +88,23 @@
               />
             </div>
 
-            <div class="col-md-6">
+            <div class="modal-body">
               <label for="address" class="form-label">Address:</label>
-              <select name="address" class="form-select" id="category">
+              <select name="address" class="form-select" id="address">
                 <option value="fashion" selected>--select address--</option>
                 {% for address in addresses %}
                 <option value="{{ address.address_name }}">
                   {{address.address_name}}
                 </option>
                 {% endfor %}
+              </select>
+            </div>
+
+            <div class="modal-body">
+              <label for="mode" class="form-label">Payment Mode :</label>
+              <select name="mode" class="form-select" id="mode">
+                <option value="online" selected>Online</option>
+                <option value="cod">Cash On Delivery</option>
               </select>
             </div>
 

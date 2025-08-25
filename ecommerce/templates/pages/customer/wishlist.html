@@ -2,15 +2,12 @@
 
 <div class="container mt-5 mb-3">
   {% if messages %}
-          <div class="alert alert-warning py-2">
-            {% for msg in messages %}
-              {{ msg }}
-            {% endfor %}
-          </div>
-        {% endif %}
+  <div class="alert alert-warning py-2">
+    {% for msg in messages %} {{ msg }} {% endfor %}
+  </div>
+  {% endif %}
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="text-black-50">WishList</h2>
-    
   </div>
   <div class="row g-4">
     {% for product in products %}
@@ -59,6 +56,7 @@
       </div>
     </div>
 
+    <!-- Order Modal -->
     <div class="modal fade" id="orderModal{{ product.id }}" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -88,7 +86,7 @@
                 required
               />
             </div>
-             <div class="col-md-6">
+            <div class="modal-body">
               <label for="address" class="form-label">Address:</label>
               <select name="address" class="form-select" id="category">
                 <option value="fashion" selected>--select address--</option>
@@ -97,6 +95,14 @@
                   {{address.address_name}}
                 </option>
                 {% endfor %}
+              </select>
+            </div>
+
+            <div class="modal-body">
+              <label for="mode" class="form-label">Payment Mode :</label>
+              <select name="mode" class="form-select" id="mode">
+                <option value="online" selected>Online</option>
+                <option value="cod">Cash On Delivery</option>
               </select>
             </div>
 

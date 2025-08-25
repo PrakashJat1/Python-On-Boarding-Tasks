@@ -6,6 +6,8 @@ from profiles.models import Address
 from products.models import Product, Category
 from .models import CustomUser
 from django.contrib import messages
+from .models import EmailTemplate, EmailConstants
+from django.core.mail import EmailMultiAlternatives
 
 from .utils import (
     generate_otp,
@@ -15,6 +17,7 @@ from .utils import (
 )
 from orders.models import Order
 from django.core.paginator import Paginator
+from django.conf import settings
 
 
 @login_required
@@ -79,17 +82,17 @@ def register_view(request):
     if is_unverfied_user is not None and is_unverfied_user.is_verified == False:
         otp = generate_otp()
 
-        mailer(
-            subject="Registration OTP",
-            message="OTP VERIFICATION",
-            html_content=otp_mail_message(
-                is_unverfied_user.first_name,
-                otp,
-                "Cubexo Software Solutions",
-                "https://cubexo.io/Contactus",
-            ),
-            to=[email],
+        template_obj = EmailTemplate.objects.get(
+            identifier=EmailConstants.REGISTRATION_OTP
         )
+        email_body = template_obj.template.format(
+            app_name="CUBEXO SOFTWARE SOLUTIONS",
+            username=first_name,
+            otp=otp,
+            app_contact_url="https://cubexo.io/Contactus",
+        )
+        mailer(template_obj.subject, email_body, [email])
+
         is_unverfied_user.otp = otp
         is_unverfied_user.save()
         context = {"email": email, "user_id": is_unverfied_user.pk}
@@ -102,17 +105,17 @@ def register_view(request):
     else:
         otp = generate_otp()
 
-        mailer(
-            subject="Registration OTP",
-            message="OTP VERIFICATION",
-            html_content=otp_mail_message(
-                first_name,
-                otp,
-                "Cubexo Software Solutions",
-                "https://cubexo.io/Contactus",
-            ),
-            to=[email],
+        template_obj = EmailTemplate.objects.get(
+            identifier=EmailConstants.REGISTRATION_OTP
         )
+        email_body = template_obj.template.format(
+            app_name="CUBEXO SOFTWARE SOLUTIONS",
+            username=first_name,
+            otp=otp,
+            app_contact_url="https://cubexo.io/Contactus",
+        )
+        mailer(template_obj.subject, email_body, [email])
+
         print("new user")
         user = CustomUser.objects.create_user(
             first_name, last_name, email, phone_no, role, password
@@ -134,12 +137,18 @@ def verify_otp_view(request, user_id):
     otp = request.POST.get("otp")
     if user.otp == otp:
 
-        mailer(
-            subject="Registration Successfully ",
-            message=f"Welcome {user.first_name}",
-            html_content=registration_successfull_message(),
-            to=[user.email],
+        template_obj = EmailTemplate.objects.get(
+            identifier=EmailConstants.REGISTRATION_CONFIRMATION
         )
+        email_body = template_obj.template.format(
+            app_contact_url="https://cubexo.io/Contactus",
+            login_url="http://127.0.0.1:8000/auth/login",
+            app_name="CUBEXO SOFTWARE SOLUTIONS",
+            username=user.first_name,
+        )
+
+        mailer(template_obj.subject, email_body, [user.email])
+
         user.is_verified = True
         user.save()
         return redirect("login")
@@ -168,17 +177,6 @@ def login_view(request):
         return redirect("login")
     elif existing_user.is_verified == False and not existing_user.role == 1:
         otp = generate_otp()
-        mailer(
-            subject="Registration OTP",
-            message="OTP VERIFICATION",
-            html_content=otp_mail_message(
-                existing_user.first_name,
-                otp,
-                "Cubexo Software Solutions",
-                "https://cubexo.io/Contactus",
-            ),
-            to=[email],
-        )
         existing_user.otp = otp
         existing_user.save()
         context = {"email": email, "user_id": existing_user.pk}
@@ -240,17 +238,18 @@ def reset_password_view(request):
 
         otp = generate_otp()
 
-        mailer(
-            subject="Reset Password OTP",
-            message="OTP VERIFICATION",
-            html_content=otp_mail_message(
-                existing_user.first_name,
-                otp,
-                "Cubexo Software Solutions",
-                "https://cubexo.io/Contactus",
-            ),
-            to=[email],
+        template_obj = EmailTemplate.objects.get(
+            identifier=EmailConstants.RESET_PASSWORD_OTP
         )
+        email_body = template_obj.template.format(
+            app_contact_url="https://cubexo.io/Contactus",
+            app_name="CUBEXO SOFTWARE SOLUTIONS",
+            username=existing_user.first_name,
+            otp=otp,
+        )
+
+        mailer(template_obj.subject, email_body, [existing_user.email])
+
         existing_user.otp = otp
         existing_user.save()
         context = {"email": email, "user_id": existing_user.pk}
@@ -298,6 +297,19 @@ def update_password_view(request, user_id):
         if user is not None:
             user.set_password(password)
             user.save()
+
+            template_obj = EmailTemplate.objects.get(
+                identifier=EmailConstants.RESET_PASSWORD
+            )
+            email_body = template_obj.template.format(
+                app_contact_url="https://cubexo.io/Contactus",
+                login_url="http://127.0.0.1:8000/auth/login",
+                app_name="CUBEXO SOFTWARE SOLUTIONS",
+                username=user.first_name,
+            )
+
+            mailer(template_obj.subject, email_body, [user.email])
+
             messages.success(request, "Password Reset successfully")
             return redirect("login")
         else:
@@ -340,5 +352,10 @@ def customer_dashboard_view(request):
     products = paginator.get_page(page)
 
     categories = Category.objects.all()
-    context = {"user": user, "products": products, "categories": categories,"addresses":addresses}
+    context = {
+        "user": user,
+        "products": products,
+        "categories": categories,
+        "addresses": addresses,
+    }
     return render(request, "dashboards/customer.html", context=context)
