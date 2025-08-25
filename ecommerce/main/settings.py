@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     "products",
     "orders",
     "cart",
-    "profiles"
+    "profiles",
+    # "django-celery-email",
 ]
 
 MIDDLEWARE = [
@@ -70,7 +71,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "products.context_processor.menu_links"
+                "products.context_processor.menu_links",
             ],
         },
     },
@@ -149,3 +150,11 @@ RAZORPAY_API_KEY = os.getenv("RAZORPAY_API_KEY")
 RAZORPAY_SECRET = os.getenv("RAZORPAY_SECRET")
 
 RAZORPAY_CALLBACK_URL = os.getenv("RAZORPAY_CALLBACK_URL")
+
+# Redis as the message broker
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+
+# Backend for storing task results (optional)
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+
+CELERY_EMAIL_BACKEND = "anymail.backends.sendinblue.EmailBackend"
