@@ -1,0 +1,120 @@
+{% extends 'common/base.html' %} {% block content %}
+
+<div class="card shadow-sm p-3 rounded-3" style="max-width: 500px">
+  <div class="d-flex justify-content-between align-items-center">
+    <div>
+      <h4 class="mb-1 text-primary">Name: {{ product.name }}</h4>
+      <p class="mb-0 text-muted">Price: ₹{{ product.price }}</p>
+    </div>
+    <button
+      class="btn btn-success px-4"
+      data-bs-toggle="modal"
+      data-bs-target="#orderModal{{ product.id }}"
+    >
+      Pay
+    </button>
+  </div>
+</div>
+
+<!-- Order Modal -->
+<div class="modal fade" id="orderModal{{ product.id }}" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="orderForm{{ product.id }}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title">Order {{ product.name }}</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+          ></button>
+        </div>
+
+        <div class="modal-body">
+          <label for="quantity{{ product.id }}">Quantity</label>
+          <input
+            type="number"
+            name="quantity"
+            id="quantity{{ product.id }}"
+            class="form-control"
+            min="1"
+            max="{{ product.quantity }}"
+            required
+          />
+
+          <label for="address{{ product.id }}" class="form-label mt-2"
+            >Address:</label
+          >
+          <select
+            name="address"
+            class="form-select"
+            id="address{{ product.id }}"
+            required
+          >
+            <option value="" disabled selected>--select address--</option>
+            {% for address in addresses %}
+            <option value="{{ address.address_name }}">
+              {{ address.address_name }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Pay</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  document
+    .getElementById("orderForm{{ product.id }}")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault(); // stop normal form submission
+
+      let formData = new FormData(this);
+
+      let response = await fetch(
+        `/orders/order-product/{{ user.id }}/{{ product.id }}/`,
+        {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+          },
+          body: formData,
+        }
+      );
+
+      let data = await response.json();
+
+      var options = {
+        key: data.razorpay_key_id,
+        amount: data.amount,
+        currency: "INR",
+        name: "My Com",
+        description: "Test Transaction",
+        order_id: data.order_id,
+        callback_url: data.razorpay_callback_url,
+        prefill: {
+          name: data.user.first_name + " " + data.user.last_name,
+          email: data.user.email,
+          contact: data.user.phone_no,
+        },
+        notes: {
+          address: formData.get("address"),
+        },
+        theme: {
+          color: "#3399cc",
+        },
+      };
+
+      var rzp1 = new Razorpay(options);
+      rzp1.open();
+    });
+</script>
+
+{% endblock %}

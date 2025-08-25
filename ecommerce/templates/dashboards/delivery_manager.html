@@ -1,0 +1,124 @@
+{% extends 'common/base.html' %} {% block content %}
+
+<div class="container mt-5 mb-3">
+  {% if messages %}
+          <div class="alert alert-warning py-2">
+            {% for msg in messages %}
+              {{ msg }}
+            {% endfor %}
+          </div>
+        {% endif %}
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- {% include 'common/search_products.html' %} {% include 'common/product_sortby.html' %} -->
+  </div>
+  <div class="row g-4">
+    {% for order in orders %}
+    <div class="col-md-4 col-lg-3">
+      <div class="card shadow-sm h-100">
+        <img
+          class="card-img-top"
+          src="{{ order.product.image.url }}"
+          alt="{{ order.product.name }}"
+          style="object-fit: cover; height: 200px"
+        />
+        <div class="card-body">
+          <h5 class="card-title text-truncate">{{ order.product.name }}</h5>
+          <p class="mb-1">
+            <span class="fw-bold text-info">Total Price:</span> ₹{{ order.price}}
+          </p>
+          <p class="mb-1">
+            <span class="fw-bold text-info">Quantity:</span>
+            {{ order.quantity }}
+          </p>
+          <p class="mb-1">
+            <span class="fw-bold text-info">Status:</span>
+            {{ order.status }}
+          </p>
+        </div>
+        <div class="card-footer d-flex justify-content-between">
+          <a
+            href="#"
+            class="btn btn-sm btn-outline-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#orderModal{{ order.id }}"
+          >
+            >Update</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="orderModal{{ order.id }}" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form action="{% url 'update-order' order.id %}" method="post">
+            {% csrf_token %}
+            <div class="modal-header">
+              <h5 class="modal-title">Order {{ product.name }}</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+
+            <div class="modal-body">
+              <label for="status">Select Status</label>
+              <select name="status" class="form-select" id="status">
+                <option value="on the way" selected>On the way</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="returned">Returned</option>
+              </select>
+            </div>
+
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-success">Update</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <p class="text-muted">No products found!</p>
+    {% endfor %}
+  </div>
+  
+</div>
+
+<script>
+  function addproduct() {
+    let formdata = new FormData();
+    let image = $("#image")[0].files[0];
+
+    formdata.set("image", image);
+    formdata.set("name", $("#name").val());
+    formdata.set("quantity", $("#quantity").val());
+    formdata.set("color", $("#color").val());
+    formdata.set("category", $("#category").val());
+    formdata.set("csrfmiddlewaretoken", "{{ csrf_token }}");
+
+    $.ajax({
+      url: '{% url "add-product" user.id %}',
+      type: "POST",
+      data: formdata,
+      success: function (response) {
+        alert(response.message);
+      },
+      error: function (xhr) {
+        alert("Error ", xhr.responseJSON.error);
+      },
+
+      // {
+      //   name: $("#name").val(),
+      //   quantity: $("#quantity").val(),
+      //   image: $("#image").val(),
+      //   color: $("#color").val(),
+      //   category: $("#category").val(),
+      //   csrfmiddlewaretoken: "{{ csrf_token }}", // CSRF token for security
+      // },
+    });
+  }
+</script>
+
+{% endblock %}

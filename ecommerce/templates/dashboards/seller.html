@@ -1,0 +1,346 @@
+{% extends 'common/base.html' %} {% block content %}
+
+<div class="container mt-5 mb-3">
+  {% if messages %}
+          <div class="alert alert-warning py-2">
+            {% for msg in messages %}
+              {{ msg }}
+            {% endfor %}
+          </div>
+        {% endif %}
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    {% include 'common/search_products.html' %}
+
+    <div class="d-flex gap-2">
+      <button
+        type="button"
+        class="btn btn-primary"
+        data-bs-toggle="modal"
+        data-bs-target="#exampleModal"
+      >
+        + Add Product
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        data-bs-toggle="modal"
+        data-bs-target="#addcategoryModal"
+      >
+        + Add Category
+      </button>
+      {% include 'common/product_sortby.html' %}
+    </div>
+  </div>
+  <div class="row g-4">
+    {% for product in products %}
+    <div class="col-md-4 col-lg-3">
+      <div class="card shadow-sm h-100">
+        <a href="{% url 'product' product.slug %}">
+          <img
+          class="card-img-top"
+          src="{{ product.image.url }}"
+          alt="{{ product.name }}"
+          style="object-fit: cover; height: 200px"
+        />
+        </a>
+        <div class="card-body">
+          <h5 class="card-title text-truncate">{{ product.name }}</h5>
+          <p class="mb-1">{{product.description}}</p>
+          <p class="mb-1">
+            <span class="fw-bold">Price:</span> ₹{{ product.price }}
+          </p>
+          <p class="mb-1">
+            <span class="fw-bold">Category:</span>
+            {{ product.category}}
+          </p>
+          <p class="mb-1">
+            <span class="fw-bold">Quantity:</span>
+            {{ product.quantity }}
+          </p>
+        </div>
+        <div class="card-footer d-flex justify-content-between">
+          <!-- <a href="#" class="btn btn-sm btn-outline-primary">Edit</a> -->
+          <a
+            data-bs-toggle="modal"
+            data-bs-target="#removefromcartModal{{ product.id }}"
+            href=""
+            class="btn btn-sm btn-outline-danger"
+            >Delete</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete product modal -->
+    <div
+      class="modal fade"
+      id="removefromcartModal{{ product.id }}"
+      tabindex="-1"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form action="{% url 'delete-product' product.id %}" method="post">
+            {% csrf_token %}
+            <div class="modal-header">
+              <h5 class="modal-title">{{ product.name }}</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <p>Confirm deletion..!</p>
+            </div>
+
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-success">Delete</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    {% empty %}
+    <p class="text-muted">No products found. Add your first product!</p>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Add product modal -->
+<div
+  class="modal fade"
+  id="exampleModal"
+  tabindex="-1"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-primary" id="exampleModalLabel">
+          Add Product
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form
+          id="add_product_form"
+          action="{% url 'add-product' user.id %}"
+          method="post"
+          enctype="multipart/form-data"
+        >
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="name" class="form-label">Name</label>
+              <input type="text" class="form-control" id="name" name="name" />
+            </div>
+            <div class="col-md-6">
+              <label for="price" class="form-label">Price</label>
+              <input
+                type="number"
+                class="form-control"
+                id="price"
+                name="price"
+                min="0.1"
+                step="0.1"
+                required
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="quantity" class="form-label">Quantity</label>
+              <input
+                type="number"
+                class="form-control"
+                id="quantity"
+                name="quantity"
+                min="1"
+                step="1"
+                required
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="description" class="form-label">Description</label>
+              <input
+                type="text"
+                class="form-control"
+                id="description"
+                name="description"
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="image" class="form-label">Photo</label>
+              <input
+                type="file"
+                class="form-control"
+                id="image"
+                name="image"
+                required
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="color" class="form-label">Color</label>
+              <input type="text" class="form-control" id="color" name="color" />
+            </div>
+            <div class="col-md-6">
+              <label for="category" class="form-label">Category</label>
+              <select name="category" class="form-select" id="category">
+                <option value="fashion" selected>--select category--</option>
+                {% for category in categories%}
+                <option value="{{ category.name }}">{{category.name}}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="modal-footer mt-3">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button type="submit" class="btn btn-primary">Save Product</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add category modal -->
+<div
+  class="modal fade"
+  id="addcategoryModal"
+  tabindex="-1"
+  aria-labelledby="addcategoryModal"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-primary" id="exampleModalLabel">
+          Add Category
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form
+          id="add_product_form"
+          action="{% url 'add-category' %}"
+          method="post"
+        >
+          {% csrf_token %}
+          <div class="col-md-6">
+            <label for="name" class="form-label">Category Name</label>
+            <input type="text" class="form-control" id="name" name="name" />
+          </div>
+
+          <div class="modal-footer mt-3">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button type="submit" class="btn btn-primary">Add</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<nav aria-label="...">
+      {% if products.has_other_pages %}
+      <ul class="pagination">
+        {% if products.has_previous %}
+
+        <li class="page-item">
+          <a
+            class="page-link"
+            href="?page={{ products.previous_page_number }}"
+            tabindex="-1"
+            >Previous</a
+          >
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+          <a class="page-link" href="#" tabindex="-1">Previous</a>
+        </li>
+        {% endif %} {% for i in products.paginator.page_range %} {% if products.number == i %}
+        <li class="page-item active">
+          <a class="page-link" href="?page={{ i }}">{{i}}</a>
+        </li>
+        {% else %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ i }}">{{i}}</a>
+        </li>
+
+        {% endif %} {% endfor %} {% if products.has_next %}
+        <li class="page-item">
+          <a
+            class="page-link"
+            href="?page={{ products.next_page_number }}"
+            tabindex="-1"
+            >Next</a
+          >
+        </li>
+        {% else %}
+
+        <li class="page-item disabled">
+          <a class="page-link" href="#">Next</a>
+        </li>
+        {% endif %}
+      </ul>
+      {% endif %}
+    </nav> 
+
+<script>
+  function addproduct() {
+    let formdata = new FormData();
+    let image = $("#image")[0].files[0];
+
+    formdata.set("image", image);
+    formdata.set("name", $("#name").val());
+    formdata.set("quantity", $("#quantity").val());
+    formdata.set("color", $("#color").val());
+    formdata.set("category", $("#category").val());
+    formdata.set("csrfmiddlewaretoken", "{{ csrf_token }}");
+
+    $.ajax({
+      url: '{% url "add-product" user.id %}',
+      type: "POST",
+      data: formdata,
+      success: function (response) {
+        alert(response.message);
+      },
+      error: function (xhr) {
+        alert("Error ", xhr.responseJSON.error);
+      },
+
+      // {
+      //   name: $("#name").val(),
+      //   quantity: $("#quantity").val(),
+      //   image: $("#image").val(),
+      //   color: $("#color").val(),
+      //   category: $("#category").val(),
+      //   csrfmiddlewaretoken: "{{ csrf_token }}", // CSRF token for security
+      // },
+    });
+  }
+</script>
+
+{% endblock %}

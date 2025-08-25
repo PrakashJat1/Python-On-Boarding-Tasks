@@ -1,0 +1,335 @@
+{% extends 'common/base.html' %} {% block content %}
+
+<div class="container mt-5 mb-3">
+  {% if messages %}
+          <div class="alert alert-warning py-2">
+            {% for msg in messages %}
+              {{ msg }}
+            {% endfor %}
+          </div>
+        {% endif %}
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="text-black-50">Address</h3>
+    <button
+      type="button"
+      class="btn btn-primary"
+      data-bs-toggle="modal"
+      data-bs-target="#addAddressModal"
+    >
+      + New
+    </button>
+  </div>
+  <div class="row g-4">
+    {% for address in addresses %}
+    <div class="col-6 col-md-4 col-lg-3">
+      <div class="card shadow-sm h-100">
+        {% if address.is_default == True %}
+        <div class="d-flex justify-content-center">
+          <p>Default</p>
+        </div>
+        {% endif %}
+        <div class="card-body">
+          <h5 class="card-title text-truncate">{{ address.address_name }}</h5>
+          <p class="mb-1">
+            <span class="fw-bold text-info">Street :</span> {{ address.street }}
+          </p>
+          <p class="mb-1">
+            <span class="fw-bold text-info">City :</span>
+            {{ address.city }}
+          </p>
+          <p class="mb-1">
+            <span class="fw-bold text-info">State :</span>
+            {{ address.state }}
+          </p>
+          <p class="mb-1">
+            <span class="fw-bold text-info">Zip-code :</span>
+            {{ address.zip_code }}
+          </p>
+          <p class="mb-1">
+            <span class="fw-bold text-info">Country :</span>
+            {{ address.country }}
+          </p>
+        </div>
+        <div class="card-footer d-flex justify-content-between">
+          <a
+            class="btn btn-sm btn-outline-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#editAddressModal{{ address.id }}"
+          >
+            >Edit</a
+          >
+          <a
+            data-bs-toggle="modal"
+            data-bs-target="#removeaddressModal{{ address.id }}"
+            class="btn btn-sm btn-outline-info"
+            >Delete</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit modal -->
+    <div class="modal fade" id="editAddressModal{{ address.id }}" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title text-primary" id="exampleModalLabel">
+              Edit Address {{address.address_name}}
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form
+              id="add_product_form"
+              action="{% url 'edit-address' address.id %}"
+              method="post"
+            >
+              {% csrf_token %}
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label for="street" class="form-label">Street </label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="street"
+                    name="street"
+                    value="{{address.street}}"
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label for="city" class="form-label">City</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="city"
+                    name="city"
+                    value="{{address.city}}"
+                  />
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label for="state" class="form-label">State</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="state"
+                  name="state"
+                  value="{{address.state}}"
+                />
+              </div>
+
+              <div class="col-md-6">
+                <label for="zip_code" class="form-label">Zip Code</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="zip_code"
+                  name="zip_code"
+                  value="{{address.zip_code}}"
+                />
+              </div>
+              <div class="col-md-6">
+                <label for="country" class="form-label">Country</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="country"
+                  name="country"
+                  value="{{address.country}}"
+                />
+              </div>
+              <div class="col-md-6">
+                <label for="default" class="form-label">Set to default</label>
+
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="default"
+                    id="default"
+                    value="1"
+                    checked
+                  />
+                  <label class="form-check-label" for="flexRadioDefault1">
+                    yes
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="default"
+                    id="default"
+                    value="0"
+                  />
+                  <label class="form-check-label" for="flexRadioDefault2">
+                    No
+                  </label>
+                </div>
+              </div>
+
+              <div class="modal-footer mt-3">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Close
+                </button>
+                <button type="submit" class="btn btn-primary">Update</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Modal  -->
+    <div
+      class="modal fade"
+      id="removeaddressModal{{ address.id }}"
+      tabindex="-1"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form action="{% url 'delete-address' address.id %}" method="post">
+            {% csrf_token %}
+            <div class="modal-header">
+              <h5 class="modal-title">{{ address.address_name }}</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <p>Confirm deletion..!</p>
+            </div>
+
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-success">Delete</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    {% empty %}
+    <p class="text-muted">No Adresses found!</p>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Add Address Modal -->
+<div class="modal fade" id="addAddressModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-primary" id="exampleModalLabel">
+          Add New Address
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form
+          id="add_product_form"
+          action="{% url 'add-address' %}"
+          method="post"
+          enctype="multipart/form-data"
+        >
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="street" class="form-label">Street </label>
+              <input
+                type="text"
+                class="form-control"
+                id="street"
+                name="street"
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="city" class="form-label">City</label>
+              <input type="text" class="form-control" id="city" name="city" />
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label for="state" class="form-label">State</label>
+            <input type="text" class="form-control" id="state" name="state" />
+          </div>
+
+          <div class="col-md-6">
+            <label for="zip_code" class="form-label">Zip Code</label>
+            <input
+              type="text"
+              class="form-control"
+              id="zip_code"
+              name="zip_code"
+            />
+          </div>
+          <div class="col-md-6">
+            <label for="country" class="form-label">Country</label>
+            <input
+              type="text"
+              class="form-control"
+              id="country"
+              name="country"
+            />
+          </div>
+          <div class="col-md-6">
+            <label for="default" class="form-label">Set to default</label>
+
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="default"
+                id="default"
+                value="1"
+                checked
+              />
+              <label class="form-check-label" for="flexRadioDefault1">
+                yes
+              </label>
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="default"
+                id="default"
+                value="0"
+              />
+              <label class="form-check-label" for="flexRadioDefault2">
+                No
+              </label>
+            </div>
+          </div>
+
+          <div class="modal-footer mt-3">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button type="submit" class="btn btn-primary">Save Address</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

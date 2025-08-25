@@ -1,0 +1,68 @@
+<nav class="navbar navbar-expand-lg navbar-light">
+  <div class="container-fluid">
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarSupportedContent"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div
+      class="collapse navbar-collapse justify-content-between"
+      id="navbarSupportedContent"
+    >
+      <ul class="navbar-nav me-auto gap-3">
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            id="navbarDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            Sort by
+          </a>
+          <ul class="dropdown-menu">
+            <li>
+              <hr class="dropdown-item" />
+              Price
+            </li>
+            <li>
+              <a class="dropdown-item" href="{% url 'filter-product' 1 %}"
+                >low to high</a
+              >
+            </li>
+            <li>
+              <a class="dropdown-item" href="{% url 'filter-product' 2 %}"
+                >high to low</a
+              >
+            </li>
+            <li>
+              <hr class="dropdown-divider" />
+              Time
+            </li>
+            <li>
+              <a class="dropdown-item" href="{% url 'filter-product' 3 %}"
+                >Latest</a
+              >
+            </li>
+            <li>
+              <a class="dropdown-item" href="{% url 'filter-product' 4 %}"
+                >Oldest</a
+              >
+            </li>
+            <li>
+              <a class="dropdown-item" href="{% url 'filter-product' 5 %}"
+                >All</a
+              >
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+

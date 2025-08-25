@@ -1,0 +1,179 @@
+{% extends 'common/base.html' %} {% block content %}
+
+<div class="container mt-5 mb-3">
+  {% if messages %}
+          <div class="alert alert-warning py-2">
+            {% for msg in messages %}
+              {{ msg }}
+            {% endfor %}
+          </div>
+        {% endif %}
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-black-50">WishList</h2>
+    
+  </div>
+  <div class="row g-4">
+    {% for product in products %}
+    <div class="col-md-4 col-lg-3">
+      <div class="card shadow-sm h-100">
+        <a href="{% url 'product' product.slug %}">
+          <img
+            class="card-img-top"
+            src="{{ product.image.url }}"
+            alt="{{ product.name }}"
+            style="object-fit: cover; height: 200px"
+          />
+        </a>
+        <div class="card-body">
+          <h5 class="card-title text-truncate">{{ product.name }}</h5>
+          <p class="mb-1">
+            <span class="fw-bold text-info">Price:</span>
+            ₹{{ product.price}}
+          </p>
+          <p class="mb-1">
+            <span class="fw-bold text-info">Quantity:</span>
+            {{ product.quantity }}
+          </p>
+        </div>
+        <div class="card-footer d-flex justify-content-between">
+          <!-- <a
+            class="btn btn-sm btn-outline-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#orderModal{{ product.id }}"
+          >
+            >Order Now</a
+          > -->
+          <a
+            class="btn btn-sm btn-outline-primary"
+            href="{% url 'checkout' product.id %}"
+          >
+            >Order Now</a
+          >
+          <a
+            data-bs-toggle="modal"
+            data-bs-target="#removefromwishlistModal{{ product.id }}"
+            class="btn btn-sm btn-outline-danger"
+            >Remove from wishlist</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="orderModal{{ product.id }}" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form
+            action="{% url 'order-product' user.id product.id %}"
+            method="post"
+          >
+            {% csrf_token %}
+            <div class="modal-header">
+              <h5 class="modal-title">Order {{ product.name }}</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+
+            <div class="modal-body">
+              <label for="quantity{{ product.id }}"> Quantity</label>
+              <input
+                type="number"
+                name="quantity"
+                id="quantity{{ product.id }}"
+                class="form-control"
+                min="1"
+                max="{{product.quantity}}"
+                required
+              />
+            </div>
+             <div class="col-md-6">
+              <label for="address" class="form-label">Address:</label>
+              <select name="address" class="form-select" id="category">
+                <option value="fashion" selected>--select address--</option>
+                {% for address in addresses%}
+                <option value="{{ address.address_name }}">
+                  {{address.address_name}}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-success">
+                Confirm Order
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="removefromwishlistModal{{ product.id }}"
+      tabindex="-1"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form
+            action="{% url 'remove-product-from-wishlist' user.id product.slug %}"
+            method="post"
+          >
+            {% csrf_token %}
+            <div class="modal-header">
+              <h5 class="modal-title">
+                {{ product.name }} - Remove from Wishlist
+              </h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <p>Confirm deletion..!</p>
+            </div>
+
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-success">Remove</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    {% empty %}
+    <p class="text-muted">No items found!</p>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+  function addproduct() {
+    let formdata = new FormData();
+    let image = $("#image")[0].files[0];
+
+    formdata.set("image", image);
+    formdata.set("name", $("#name").val());
+    formdata.set("quantity", $("#quantity").val());
+    formdata.set("color", $("#color").val());
+    formdata.set("category", $("#category").val());
+    formdata.set("csrfmiddlewaretoken", "{{ csrf_token }}");
+
+    $.ajax({
+      url: '{% url "add-product" user.id %}',
+      type: "POST",
+      data: formdata,
+      success: function (response) {
+        alert(response.message);
+      },
+      error: function (xhr) {
+        alert("Error ", xhr.responseJSON.error);
+      },
+    });
+  }
+</script>
+
+{% endblock %}

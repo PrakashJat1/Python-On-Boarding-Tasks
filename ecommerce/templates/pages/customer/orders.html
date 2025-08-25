@@ -1,0 +1,99 @@
+{% extends 'common/base.html' %} {% block content %}
+
+<div class="container mt-5 mb-3">
+  {% if messages %}
+          <div class="alert alert-warning py-2">
+            {% for msg in messages %}
+              {{ msg }}
+            {% endfor %}
+          </div>
+        {% endif %}
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-black-50">Orders</h2>
+    
+  </div>
+  <div class="row g-4">
+    {% for order in orders %}
+    <div class="col-md-4 col-lg-3">
+      <div class="card shadow-sm h-100">
+        <a href="{% url 'product' order.product.slug %}">
+          <img
+            class="card-img-top"
+            src="{{ order.product.image.url }}"
+            alt="{{ order.product.name }}"
+            style="object-fit: cover; height: 200px"
+          />
+        </a>
+        <div class="card-body">
+          <h5 class="card-title text-truncate">{{ order.product.name }}</h5>
+          <p class="mb-1">
+            <span class="fw-bold text-info">Total Price:</span>
+            ₹{{ order.price}}
+          </p>
+          <p class="mb-1">
+            <span class="fw-bold text-info">Total Quantity:</span>
+            {{ order.quantity }}
+          </p>
+          <p class="mb-1">
+            <span class="fw-bold text-info">Address :</span>
+            {{ order.address }}
+          </p>
+          <p class="mb-1">
+            <span class="fw-bold text-info">Payment Status :</span>
+            {{ order.payment_status }}
+          </p>
+          <p class="mb-1">
+            <span class="fw-bold text-info">Order Status :</span>
+            {{ order.status }}
+          </p>
+        </div>
+        <!-- <div class="card-footer d-flex justify-content-between">
+          <a
+            class="btn btn-sm btn-outline-primary disabled"
+            data-bs-toggle="modal"
+            data-bs-target="#cancelorderModal{{ order.id }}"
+          >
+            >Cancel</a
+          >
+        </div> -->
+      </div>
+    </div>
+
+ 
+    {% empty %}
+    <p class="text-muted">No orders found!</p>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}
+
+   <!-- <div class="modal fade" id="cancelorderModal{{ order.id }}" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form
+            action="{% url 'remove-product-from-wishlist' user.id product.slug %}"
+            method="post"
+          >
+            {% csrf_token %}
+            <div class="modal-header">
+              <h5 class="modal-title">
+                {{ product.name }} - Remove from Wishlist
+              </h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <p>Confirm deletion..!</p>
+            </div>
+
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-success">Remove</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div> -->

@@ -1,0 +1,105 @@
+<nav
+  class="navbar navbar-expand-lg navbar-light rounded-2"
+  style="background-color: #e3f2fd"
+>
+  <a class="navbar-brand text-info-emphasis ms-3" href="">My Ecom</a>
+  <button
+    class="navbar-toggler"
+    type="button"
+    data-bs-toggle="collapse"
+    data-bs-target="#navbarSupportedContent"
+    aria-controls="navbarSupportedContent"
+    aria-expanded="false"
+    aria-label="Toggle navigation"
+  >
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  {% if user.is_authenticated %}
+  <a href="{% url 'user-home' user.id %}" class="btn btn-default" type="button">
+    🏠Home
+  </a>
+  {% endif%}
+
+  <div class="collapse navbar-collapse gap-5" id="navbarSupportedContent"></div>
+
+  <div class="navbar-nav gap-3 me-3">
+    <!-- if customer -->
+    {% if user.role == 4%}
+    <ul class="navbar-nav me-auto gap-3">
+      <li class="nav-item dropdown">
+        <a
+          class="nav-link dropdown-toggle"
+          href="#"
+          id="navbarDropdown"
+          role="button"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          👤{{ user.first_name }}
+        </a>
+        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <li>
+            <a class="dropdown-item" href="{% url 'address-page' %}">Address</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="{% url 'profile-page' %}"
+              >Profile
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="{% url 'wishlist-page' %}"
+              >Wishlist</a
+            >
+          </li>
+          <li>
+            <a class="dropdown-item" href="{% url 'order-page' %}">Orders</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+
+    {% else %}
+    <a class="btn text-info bg-opacity-25" href="{% url 'profile-page' %}">👤{{ user.first_name }}</a>
+    {% endif %}
+    {% if user.role == 4 %}
+    <a
+      href="{% url 'cart-page' user.id %}"
+      class="bg-opacity-25 btn text-info-emphasis"
+      type="button"
+    >
+      🛒 Cart
+    </a>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+    <a
+      class="bg-opacity-25 bg-danger btn"
+      title="logout"
+      href="{% url 'logout' %}"
+    >
+      📤 Logout</a
+    >
+    {% else %}
+    <a class="btn btn-primary" href="{% url 'register' %}">Register</a>
+    <a class="btn btn-primary" href="{% url 'login' %}">Login</a>
+    {% endif %}
+  </div>
+</nav>
+
+<!-- products-by-category -->
+
+{% if user.role != 2 %}
+<nav
+  class="d-flex justify-content-between ms-5 me-5"
+  style="background-color: #ffffff"
+>
+  {% for category in categories %}
+  <a
+    href="{% url 'products-by-category' category.slug %}"
+    title="{{category.name}}"
+    class="btn text-info bg-opacity-25"
+    >{{category.name}}</a
+  >
+  {% endfor %}
+</nav>
+{% endif %}
